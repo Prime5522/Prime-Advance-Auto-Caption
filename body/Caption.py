@@ -9,7 +9,6 @@ from pyrogram.types import *
 
 @Client.on_message(filters.command("start") & filters.private)
 async def strtCap(bot, message):
-    await message.react(emoji="🔥", big=True)
     user_id = int(message.from_user.id)
     await insert(user_id)
     keyboard = InlineKeyboardMarkup(
