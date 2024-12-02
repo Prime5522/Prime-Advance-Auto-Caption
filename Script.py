@@ -28,8 +28,7 @@ class script(object):
 `{year}` = Yᴇᴀʀ Oғ Fɪʟᴇ
 `{default_caption}` = Rᴇᴀʟ Cᴀᴘᴛɪᴏɴ Oғ Fɪʟᴇ.
 
-Eg:- `/set_cap
-{file_name}
+Eg:- `/set_cap {file_name}
 
 ⚙️ Size » {file_size}
 
