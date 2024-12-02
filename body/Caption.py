@@ -21,6 +21,8 @@ async def strtCap(bot, message):
             ],[
                 InlineKeyboardButton("📢 ᴜᴘᴅᴀᴛᴇꜱ ᴄʜᴀɴɴᴇʟ", url=f"https://t.me/Prime_Botz"),
                 InlineKeyboardButton("💬 ꜱᴜᴘᴘᴏʀᴛ ɢʀᴏᴜᴘ 📜", url=r"https://t.me/Prime_Botz_Support")
+            ],[                
+                InlineKeyboardButton("☆💫 𝗖𝗥𝗘𝗔𝗧𝗢𝗥 💫☆", url=r"https://t.me/Prime_Nayem")
         ]]
     )
     await message.reply_photo(
@@ -169,7 +171,9 @@ async def start(bot, query):
             ],[
                 InlineKeyboardButton("📢 ᴜᴘᴅᴀᴛᴇꜱ ᴄʜᴀɴɴᴇʟ", url=f"https://t.me/Prime_Botz"),
                 InlineKeyboardButton("💬 ꜱᴜᴘᴘᴏʀᴛ ɢʀᴏᴜᴘ 📜", url=r"https://t.me/Prime_Botz_Support")
-            ]]
+            ],[                
+                InlineKeyboardButton("☆💫 𝗖𝗥𝗘𝗔𝗧𝗢𝗥 💫☆", url=r"https://t.me/Prime_Nayem")
+        ]]
         ),
         disable_web_page_preview=True
 )
