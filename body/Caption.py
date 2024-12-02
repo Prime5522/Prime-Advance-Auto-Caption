@@ -173,7 +173,7 @@ async def start(bot, query):
                 InlineKeyboardButton("💬 ꜱᴜᴘᴘᴏʀᴛ ɢʀᴏᴜᴘ 📜", url=r"https://t.me/Prime_Botz_Support")
             ],[                
                 InlineKeyboardButton("☆💫 𝗖𝗥𝗘𝗔𝗧𝗢𝗥 💫☆", url=r"https://t.me/Prime_Nayem")
-        ]]
+            ]]
         ),
         disable_web_page_preview=True
 )
