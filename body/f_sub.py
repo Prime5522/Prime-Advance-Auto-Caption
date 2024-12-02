@@ -23,12 +23,21 @@ async def not_subscribed(_, client, message):
 @Client.on_message(filters.private & filters.create(not_subscribed))
 async def forces_sub(client, message):
     buttons = [[InlineKeyboardButton(text="📢 ✇ Join Our Updates Channel ✇ 📢", url=f"https://t.me/{FORCE_SUB}") ]]
-    text = "**Sᴏʀʀy Dᴜᴅᴇ Yᴏᴜ'ʀᴇ Nᴏᴛ Jᴏɪɴᴇᴅ My Cʜᴀɴɴᴇʟ 😐. Sᴏ Pʟᴇᴀꜱᴇ Jᴏɪɴ Oᴜʀ Uᴩᴅᴀᴛᴇ Cʜᴀɴɴᴇʟ Tᴏ Cᴄᴏɴᴛɪɴᴜᴇ**"
+    text = "**Sᴏʀʀy Dᴜᴅᴇ Yᴏᴜ'ʀᴇ Nᴏᴛ Jᴏɪɴᴇᴅ My Cʜᴀɴɴᴇʟ 😐. Sᴏ Pʟᴇᴀꜱᴇ Jᴏɪɴ Oᴜʀ Uᴩᴅᴀᴛᴇ Cʜᴀɴɴᴇʟ Tᴏ Cᴏɴᴛɪɴᴜᴇ**"
+    photo_url = "https://envs.sh/KgA.jpg"  # এখানে আপনার ইমেজ লিংক ব্যবহার করুন
+
     try:
         silicon = await client.get_chat_member(FORCE_SUB, message.from_user.id)    
-        if silicon.status == enums.ChatMemberStatus.BANNED:                                   
+        if silicon.status == enums.ChatMemberStatus.BANNED:  # যদি ব্যবহারকারী ব্যান হয়ে থাকে                             
             return await client.send_message(message.from_user.id, text="Sᴏʀʀy Yᴏᴜ'ʀᴇ Bᴀɴɴᴇᴅ Tᴏ Uꜱᴇ Mᴇ")  
-    except UserNotParticipant:                       
-        return await message.reply_text(text=text, reply_markup=InlineKeyboardMarkup(buttons))
-    return await message.reply_text(text=text, reply_markup=InlineKeyboardMarkup(buttons))
-          
+    except UserNotParticipant:  # যদি ব্যবহারকারী সদস্য না হয়                     
+        return await message.reply_photo(
+            photo=photo_url,  # এখানে ইমেজ লিংক দিবেন
+            caption=text,  # মেসেজ টেক্সট
+            reply_markup=InlineKeyboardMarkup(buttons)  # চ্যানেল যোগদানের বাটন
+        )
+    return await message.reply_photo(
+        photo=photo_url,
+        caption=text,
+        reply_markup=InlineKeyboardMarkup(buttons)
+    )
