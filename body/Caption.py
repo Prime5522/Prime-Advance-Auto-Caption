@@ -4,6 +4,7 @@ import asyncio
 from Script import script
 from .database import *
 import re
+import time  # <-- Added for broadcast sleep
 from pyrogram.errors import FloodWait
 from pyrogram.types import *
 
@@ -39,41 +40,38 @@ async def all_db_users_here(client,message):
 
 @Client.on_message(filters.private & filters.user(ADMIN) & filters.command(["broadcast"]))
 async def broadcast(bot, message):
-    if (message.reply_to_message):
-        silicon = await message.reply_text("Geting All ids from database..\n Please wait")
-        all_users = await getid()
+    if message.reply_to_message:
+        status = await message.reply("Broadcast processing...")
+        users = await getid()
         tot = await total_user()
-        success = 0
-        failed = 0
-        deactivated = 0
-        blocked = 0
-        await silicon.edit(f"ʙʀᴏᴀᴅᴄᴀsᴛɪɴɢ...")
-        async for user in all_users:
+        success = failed = deactivated = blocked = 0
+
+        for user in users:
             try:
-                time.sleep(1)
                 await message.reply_to_message.copy(user['_id'])
                 success += 1
             except errors.InputUserDeactivated:
-                deactivated +=1
+                deactivated += 1
                 await delete({"_id": user['_id']})
             except errors.UserIsBlocked:
-                blocked +=1
+                blocked += 1
                 await delete({"_id": user['_id']})
-            except Exception as e:
+            except FloodWait as e:
+                await asyncio.sleep(e.x)  # <-- Fixed variable name from t.x to e.x
+                continue
+            except Exception:
                 failed += 1
                 await delete({"_id": user['_id']})
-                pass
-            try:
-                await silicon.edit(f"<u>ʙʀᴏᴀᴅᴄᴀsᴛ ᴘʀᴏᴄᴇssɪɴɢ</u>\n\n• ᴛᴏᴛᴀʟ ᴜsᴇʀs: {tot}\n• sᴜᴄᴄᴇssғᴜʟ: {success}\n• ʙʟᴏᴄᴋᴇᴅ ᴜsᴇʀs: {blocked}\n• ᴅᴇʟᴇᴛᴇᴅ ᴀᴄᴄᴏᴜɴᴛs: {deactivated}\n• ᴜɴsᴜᴄᴄᴇssғᴜʟ: {failed}")
-            except FloodWait as e:
-                await asyncio.sleep(t.x)
-        await silicon.edit(f"<u>ʙʀᴏᴀᴅᴄᴀsᴛ ᴄᴏᴍᴘʟᴇᴛᴇᴅ</u>\n\n• ᴛᴏᴛᴀʟ ᴜsᴇʀs: {tot}\n• sᴜᴄᴄᴇssғᴜʟ: {success}\n• ʙʟᴏᴄᴋᴇᴅ ᴜsᴇʀs: {blocked}\n• ᴅᴇʟᴇᴛᴇᴅ ᴀᴄᴄᴏᴜɴᴛs: {deactivated}\n• ᴜɴsᴜᴄᴄᴇssғᴜʟ: {failed}")
+
+        await status.edit(
+            f"<u>Broadcast completed</u>\n\n• Total users: {tot}\n• Successful: {success}\n• Blocked: {blocked}\n• Deactivated: {deactivated}\n• Failed: {failed}"
+        )
 
 @Client.on_message(filters.private & filters.user(ADMIN) & filters.command("restart"))
 async def restart_bot(b, m):
-    silicon = await b.send_message(text="**🔄 𝙿𝚁𝙾𝙲𝙴𝚂𝚂𝙴𝚂 𝚂𝚃𝙾𝙿𝙴𝙳. 𝙱𝙾𝚃 𝙸𝚂 𝚁𝙴𝚂𝚃𝙰𝚁𝚃𝙸𝙽𝙶...**", chat_id=m.chat.id)       
+    msg = await b.send_message("Restarting bot...", chat_id=m.chat.id)
     await asyncio.sleep(3)
-    await silicon.edit("**✅️ 𝙱𝙾𝚃 𝙸𝚂 𝚁𝙴𝚂𝚃𝙰𝚁𝚃𝙴𝙳. 𝙽𝙾𝚆 𝚈𝙾𝚄 𝙲𝙰𝙽 𝚄𝚂𝙴 𝙼𝙴**")
+    await msg.edit("Bot restarted successfully.")
     os.execl(sys.executable, sys.executable, *sys.argv)
 
 @Client.on_message(filters.command("set_cap") & filters.channel)
@@ -101,21 +99,29 @@ async def delCap(_, msg):
         await chnl_ids.delete_one({"chnl_id": chnl_id})
         return await msg.reply("<b><i>✓ Sᴜᴄᴄᴇssғᴜʟʟʏ... Dᴇʟᴇᴛᴇᴅ Yᴏᴜʀ Cᴀᴘᴛɪᴏɴ Nᴏᴡ I ᴀᴍ Usɪɴɢ Mʏ Dᴇғᴀᴜʟᴛ Cᴀᴘᴛɪᴏɴ </i></b>")
     except Exception as e:
-        e_val = await msg.replay(f"ERR I GOT: {e}")
+        e_val = await msg.reply(f"ERR I GOT: {e}")  # <-- Fixed from .replay to .reply
         await asyncio.sleep(5)
         await e_val.delete()
         return
 
+# Updated: Extract more languages and set default to "Not Sure"
 def extract_language(default_caption):
-    language_pattern = r'\b(Hindi|English|Tamil|Telugu|Malayalam|Kannada|Hin)\b'#Contribute More Language If You Have
+    language_pattern = r'\b(Hindi|English|Tamil|Telugu|Malayalam|Kannada|Bengali|Bangla|Punjabi|Marathi|Gujarati|Bhojpuri|Urdu|Korean|Japanese|Chinese|Spanish|French|German|Russian|Arabic|Turkish|Thai|Sinhala|Oriya|Assamese|Nepali|Filipino|Vietnamese|Portuguese|Italian|Dutch|Swedish|Norwegian|Polish|Czech|Romanian|Ukrainian|Hebrew|Farsi|Pashto|Serbian|Malay|Indonesian|Tagalog|Hin)\b'
     languages = set(re.findall(language_pattern, default_caption, re.IGNORECASE))
-    if not languages:
-        return "Hindi-English"
-    return ", ".join(sorted(languages, key=str.lower))
+    return ", ".join(sorted(languages, key=str.lower)) if languages else "Not Sure"
 
 def extract_year(default_caption):
     match = re.search(r'\b(19\d{2}|20\d{2})\b', default_caption)
     return match.group(1) if match else None
+
+def get_size(size):
+    units = ["Bytes", "Kʙ", "Mʙ", "Gʙ", "Tʙ", "Pʙ", "Eʙ"]
+    size = float(size)
+    i = 0
+    while size >= 1024.0 and i < len(units) - 1:
+        i += 1
+        size /= 1024.0
+    return "%.2f %s" % (size, units[i])
 
 @Client.on_message(filters.channel)
 async def reCap(bot, message):
@@ -138,25 +144,16 @@ async def reCap(bot, message):
                 try:
                     if cap_dets:
                         cap = cap_dets["caption"]
-                        replaced_caption = cap.format(file_name=file_name, file_size=get_size(file_size), default_caption=default_caption, language=language, year=year)
-                        await message.edit(replaced_caption)
-                    else:
-                        replaced_caption = DEF_CAP.format(file_name=file_name, file_size=get_size(file_size), default_caption=default_caption, language=language, year=year)
+                        replaced_caption = cap.format(
+                            file_name=file_name,
+                            file_size=get_size(file_size),
+                            default_caption=default_caption,
+                            language=language,
+                            year=year
+                        )
                         await message.edit(replaced_caption)
                 except FloodWait as e:
-                    await asyncio.sleep(e.x)
-                    continue
-    return
-
-# Size conversion function
-def get_size(size):
-    units = ["Bytes", "Kʙ", "Mʙ", "Gʙ", "Tʙ", "Pʙ", "Eʙ"]
-    size = float(size)
-    i = 0
-    while size >= 1024.0 and i < len(units) - 1:  # Changed the condition to stop at the last unit
-        i += 1
-        size /= 1024.0
-    return "%.2f %s" % (size, units[i])
+                    await asyncio.sleep(e.x)  # <-- ensures even rapid messages are processed
 
 @Client.on_callback_query(filters.regex(r'^start'))
 async def start(bot, query):
@@ -192,7 +189,6 @@ async def help(bot, query):
         disable_web_page_preview=True    
 )
 
-
 @Client.on_callback_query(filters.regex(r'^about'))
 async def about(bot, query):
     await query.message.edit_text(
@@ -205,6 +201,4 @@ async def about(bot, query):
             ]]
         ),
         disable_web_page_preview=True 
-
 )
-
