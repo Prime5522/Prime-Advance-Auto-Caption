@@ -21,7 +21,7 @@ async def strtCap(bot, message):
                 InlineKeyboardButton("Aʙᴏᴜᴛ", callback_data="about")
             ],[
                 InlineKeyboardButton("📢 ᴜᴘᴅᴀᴛᴇꜱ ᴄʜᴀɴɴᴇʟ", url=f"https://t.me/Prime_Botz"),
-                InlineKeyboardButton("💬 ꜱᴜᴘᴘᴏʀᴛ ɢʀᴏᴜᴘ 📜", url=r"https://t.me/Prime_Botz_Support")
+                InlineKeyboardButton("💬 ꜱᴜᴘᴘᴏʀᴛ ɢʀᴏᴜᴘ", url=r"https://t.me/Prime_Botz_Support")
             ],[                
                 InlineKeyboardButton("☆💫 𝗖𝗥𝗘𝗔𝗧𝗢𝗥 💫☆", url=r"https://t.me/Prime_Nayem")
         ]]
