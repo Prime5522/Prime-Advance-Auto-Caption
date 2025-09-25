@@ -16,7 +16,7 @@
 * `MONGO_DB` Your mongo db url
 * `DEF_CAP` Your Default Caption
 * `FORCE_SUB` Your Channel Link Without @
-* `SILICON_PIC` Your Custom Start Pic
+* `PRIME_PIC` Your Custom Start Pic
 
 ## 𝐶𝑜𝑚𝑚𝑎𝑛𝑑𝑠
 
