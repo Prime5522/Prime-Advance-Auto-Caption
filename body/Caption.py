@@ -20,14 +20,14 @@ async def strtCap(bot, message):
                 InlineKeyboardButton("Hᴇʟᴘ", callback_data="help"),
                 InlineKeyboardButton("Aʙᴏᴜᴛ", callback_data="about")
             ],[
-                InlineKeyboardButton("📢 ᴜᴘᴅᴀᴛᴇꜱ ᴄʜᴀɴɴᴇʟ", url=f"https://t.me/Prime_Botz"),
-                InlineKeyboardButton("💬 ꜱᴜᴘᴘᴏʀᴛ ɢʀᴏᴜᴘ", url=r"https://t.me/Prime_Botz_Support")
+                InlineKeyboardButton("📢 ᴜᴘᴅᴀᴛᴇꜱ ᴄʜᴀɴɴᴇʟ", url=f"https://t.me/PrimeXBots"),
+                InlineKeyboardButton("💬 ꜱᴜᴘᴘᴏʀᴛ ɢʀᴏᴜᴘ", url=r"https://t.me/Prime_Support_Group")
             ],[                
                 InlineKeyboardButton("☆💫 𝗖𝗥𝗘𝗔𝗧𝗢𝗥 💫☆", url=r"https://t.me/Prime_Nayem")
         ]]
     )
     await message.reply_photo(
-        photo=SILICON_PIC,
+        photo=PRIME_PIC,
         caption=f"<b>Hᴇʟʟᴏ {message.from_user.mention}\n\nɪ ᴀᴍ ᴀᴜᴛᴏ ᴄᴀᴘᴛɪᴏɴ ʙᴏᴛ ᴡɪᴛʜ ᴄᴜsᴛᴏᴍ ᴄᴀᴘᴛɪᴏɴ.\n\nFᴏʀ ᴍᴏʀᴇ ɪɴғᴏ ʜᴏᴡ ᴛᴏ ᴜsᴇ ᴍᴇ ᴄʟɪᴄᴋ ᴏɴ ʜᴇʟᴘ ʙᴜᴛᴛᴏɴ ɢɪᴠᴇɴ ʙᴇʟᴏᴡ.\n\n <blockquote>⚙️ ᴍᴀɪɴᴛᴀɪɴᴇᴅ ʙʏ ➠ <a href='https://t.me/Prime_Botz'>ᴘʀɪᴍᴇ ʙᴏᴛᴢ</a></blockquote></b>",
         reply_markup=keyboard
     )
@@ -166,8 +166,8 @@ async def start(bot, query):
                 InlineKeyboardButton("Hᴇʟᴘ", callback_data="help"),
                 InlineKeyboardButton("Aʙᴏᴜᴛ", callback_data="about")
             ],[
-                InlineKeyboardButton("📢 ᴜᴘᴅᴀᴛᴇꜱ ᴄʜᴀɴɴᴇʟ", url=f"https://t.me/Prime_Botz"),
-                InlineKeyboardButton("💬 ꜱᴜᴘᴘᴏʀᴛ ɢʀᴏᴜᴘ 📜", url=r"https://t.me/Prime_Botz_Support")
+                InlineKeyboardButton("📢 ᴜᴘᴅᴀᴛᴇꜱ ᴄʜᴀɴɴᴇʟ", url=f"https://t.me/PrimeXBots"),
+                InlineKeyboardButton("💬 ꜱᴜᴘᴘᴏʀᴛ ɢʀᴏᴜᴘ 📜", url=r"https://t.me/Prime_Support_Group")
             ],[                
                 InlineKeyboardButton("☆💫 𝗖𝗥𝗘𝗔𝗧𝗢𝗥 💫☆", url=r"https://t.me/Prime_Nayem")
             ]]
