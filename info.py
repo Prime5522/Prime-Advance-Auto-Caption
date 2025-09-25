@@ -15,11 +15,11 @@ def is_enabled(value, default):
 
 
 ADMIN = int(getenv("ADMIN", ""))
-SILICON_PIC = os.environ.get("SILICON_PIC", "https://envs.sh/CDg.jpg")
+SILICON_PIC = os.environ.get("SILICON_PIC", "https://i.ibb.co.com/v68h4mVh/IMG-20250925-231519-095.jpg") #Bot star message picture link here
 API_ID = int(getenv("API_ID", ""))
 API_HASH = str(getenv("API_HASH", ""))
 BOT_TOKEN = str(getenv("BOT_TOKEN", ""))
-FORCE_SUB = os.environ.get("FORCE_SUB", "Prime_Botz") 
+FORCE_SUB = os.environ.get("FORCE_SUB", "PrimeXBots") 
 MONGO_DB = str(getenv("MONGO_DB", "",))
 DEF_CAP = str(
     getenv(
