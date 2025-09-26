@@ -35,8 +35,8 @@ async def strtCap(bot, message):
 @Client.on_message(filters.private & filters.user(ADMIN)  & filters.command(["total_users"]))
 async def all_db_users_here(client,message):
     silicon = await message.reply_text("Please Wait....")
-    silicon_botz = await total_user()
-    await silicon.edit(f"Tᴏᴛᴀʟ Usᴇʀ :- `{silicon_botz}`")
+    primexbots = await total_user()
+    await silicon.edit(f"Tᴏᴛᴀʟ Usᴇʀ :- `{primexbots}`")
 
 @Client.on_message(filters.private & filters.user(ADMIN) & filters.command(["broadcast"]))
 async def broadcast(bot, message):
