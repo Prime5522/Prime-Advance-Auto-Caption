@@ -177,36 +177,81 @@ def extract_year(default_caption):
     match = re.search(r'\b(19\d{2}|20\d{2})\b', default_caption)
     return match.group(1) if match else None
 
+# রিট্রাই সীমা (None দিলে অসীমান্ত রিট্রাই, কিন্তু প্রোডাকশনে ভুল হতে পারে)
+RETRY_LIMIT = 5
+
 @Client.on_message(filters.channel)
 async def reCap(bot, message):
     chnl_id = message.chat.id
-    default_caption = message.caption
+    default_caption = message.caption or ""     # None হলে খালি স্ট্রিং
     if message.media:
         for file_type in ("video", "audio", "document", "voice"):
             obj = getattr(message, file_type, None)
-            if obj and hasattr(obj, "file_name"):
-                file_name = obj.file_name
-                file_size = obj.file_size
+            if obj:
+                # file_name পাওয়া গেলে ব্যবহার, নাহলে caption (প্রথম লাইন) ব্যবহার
+                file_name = getattr(obj, "file_name", None)
+                if not file_name or not str(file_name).strip():
+                    # caption থেকে প্রথম লাইনের টেক্সট নিন (আর যদি সেটা ফাঁকা হয়, fallback বানান)
+                    cap_first_line = default_caption.split("\n", 1)[0].strip() if default_caption else ""
+                    if cap_first_line:
+                        file_name = cap_first_line
+                    else:
+                        unique = getattr(obj, "file_unique_id", None) or str(message.message_id)
+                        file_name = f"{file_type}_{unique}"
+
+                # sanitize করে ফেলুন (ব্যবহারযোগ্য নাম)
+                file_name = re.sub(r"@\w+\s*", "", str(file_name))
+                file_name = file_name.replace("_", " ").replace(".", " ").strip()
+                if len(file_name) > 200:  # অতিরিক্ত লম্বা হলে ছেটিয়ে দিন
+                    file_name = file_name[:200].rsplit(" ", 1)[0]
+
+                file_size = getattr(obj, "file_size", 0)
                 language = extract_language(default_caption)
                 year = extract_year(default_caption)
-                file_name = (
-                    re.sub(r"@\w+\s*", "", file_name)
-                    .replace("_", " ")
-                    .replace(".", " ")
-                )
                 cap_dets = await chnl_ids.find_one({"chnl_id": chnl_id})
-                try:
-                    if cap_dets:
-                        cap = cap_dets["caption"]
-                        replaced_caption = cap.format(file_name=file_name, file_size=get_size(file_size), default_caption=default_caption, language=language, year=year)
+
+                if cap_dets:
+                    replaced_caption = cap_dets["caption"].format(
+                        file_name=file_name,
+                        file_size=get_size(file_size),
+                        default_caption=default_caption,
+                        language=language,
+                        year=year
+                    )
+                else:
+                    replaced_caption = DEF_CAP.format(
+                        file_name=file_name,
+                        file_size=get_size(file_size),
+                        default_caption=default_caption,
+                        language=language,
+                        year=year
+                    )
+
+                # FloodWait সহ নিরাপদ এডিট (রিট্রাই লিমিট সহ)
+                retries = 0
+                success = False
+                while True:
+                    try:
                         await message.edit(replaced_caption)
-                    else:
-                        replaced_caption = DEF_CAP.format(file_name=file_name, file_size=get_size(file_size), default_caption=default_caption, language=language, year=year)
-                        await message.edit(replaced_caption)
-                except FloodWait as e:
-                    await asyncio.sleep(e.x)
-                    continue
+                        success = True
+                        break
+                    except FloodWait as e:
+                        # Pyrogram বিভিন্ন ভার্সনে attribute ভিন্ন হতে পারে; তাই দুটোই চেক করছি
+                        wait = getattr(e, "value", None) or getattr(e, "x", None) or 30
+                        print(f"[FloodWait] waiting {wait} seconds before retry...")
+                        await asyncio.sleep(wait)
+                        retries += 1
+                        if RETRY_LIMIT is not None and retries >= RETRY_LIMIT:
+                            print(f"[FloodWait] reached retry limit ({RETRY_LIMIT}). Giving up for this message.")
+                            break
+                        # লুপে ফিরে গিয়ে আবার চেষ্টা হবে
+                    except Exception as ex:
+                        print(f"[ERROR] while editing message: {ex}")
+                        break
+
+                # আপনি চাইলে success অনুযায়ী লগ/ইনফো পাঠাতে পারেন
     return
+
 
 # Size conversion function
 def get_size(size):
