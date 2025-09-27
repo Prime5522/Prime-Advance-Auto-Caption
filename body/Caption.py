@@ -105,11 +105,73 @@ async def delCap(_, msg):
         return
 
 def extract_language(default_caption):
-    language_pattern = r'\b(Hindi|English|Tamil|Telugu|Malayalam|Kannada|Hin)\b'#Contribute More Language If You Have
-    languages = set(re.findall(language_pattern, default_caption, re.IGNORECASE))
-    if not languages:
-        return "Hindi-English"
-    return ", ".join(sorted(languages, key=str.lower))
+    language_map = {
+        "hindi": "Hindi", "hi": "Hindi", "hin": "Hindi",
+        "english": "English", "en": "English",
+        "tamil": "Tamil", "ta": "Tamil",
+        "telugu": "Telugu", "te": "Telugu",
+        "malayalam": "Malayalam", "ml": "Malayalam",
+        "kannada": "Kannada", "kn": "Kannada",
+        # Bengali & Bangla আলাদা + ba এড
+        "bengali": "Bengali", "bn": "Bengali",
+        "bangla": "Bangla", "ba": "Bangla",
+        "punjabi": "Punjabi", "pa": "Punjabi",
+        "marathi": "Marathi", "mr": "Marathi",
+        "gujarati": "Gujarati", "gu": "Gujarati",
+        "bhojpuri": "Bhojpuri",
+        "urdu": "Urdu", "ur": "Urdu",
+        "korean": "Korean", "ko": "Korean",
+        "japanese": "Japanese", "ja": "Japanese", "jp": "Japanese",
+        "chinese": "Chinese", "zh": "Chinese", "cn": "Chinese",
+        "spanish": "Spanish", "es": "Spanish",
+        "french": "French", "fr": "French",
+        "german": "German", "de": "German",
+        "russian": "Russian", "ru": "Russian",
+        "arabic": "Arabic", "ar": "Arabic",
+        "turkish": "Turkish", "tr": "Turkish",
+        "thai": "Thai", "th": "Thai",
+        "sinhala": "Sinhala", "si": "Sinhala",
+        "oriya": "Oriya", "odia": "Oriya", "or": "Oriya",
+        "assamese": "Assamese", "as": "Assamese",
+        "nepali": "Nepali", "ne": "Nepali",
+        "filipino": "Filipino", "tagalog": "Filipino", "fil": "Filipino", "tl": "Filipino",
+        "vietnamese": "Vietnamese", "vi": "Vietnamese",
+        "portuguese": "Portuguese", "pt": "Portuguese",
+        "italian": "Italian", "it": "Italian",
+        "dutch": "Dutch", "nl": "Dutch",
+        "swedish": "Swedish", "sv": "Swedish",
+        "norwegian": "Norwegian", "no": "Norwegian",
+        "polish": "Polish", "pl": "Polish",
+        "czech": "Czech", "cs": "Czech",
+        "romanian": "Romanian", "ro": "Romanian",
+        "ukrainian": "Ukrainian", "uk": "Ukrainian",
+        "hebrew": "Hebrew", "he": "Hebrew",
+        "farsi": "Farsi", "fa": "Farsi",
+        "pashto": "Pashto", "ps": "Pashto",
+        "serbian": "Serbian", "sr": "Serbian",
+        "malay": "Malay", "ms": "Malay",
+        "indonesian": "Indonesian", "id": "Indonesian",
+    }
+
+    language_pattern = r'\b(' + "|".join(language_map.keys()) + r')\b'
+    matches = re.findall(language_pattern, default_caption, re.IGNORECASE)
+
+    if not matches:
+        return "Not-Sure"
+
+    detected_languages = set()
+    for match in matches:
+        detected_languages.add(language_map[match.lower()])
+
+    return ", ".join(sorted(detected_languages, key=str.lower))
+
+
+# টেস্ট
+print(extract_language("Available in bn, ba, Bangla"))
+# Output: Bangla, Bengali
+print(extract_language("Dubbed in Bengali and Bangla"))
+# Output: Bangla, Bengali
+
 
 def extract_year(default_caption):
     match = re.search(r'\b(19\d{2}|20\d{2})\b', default_caption)
@@ -200,7 +262,47 @@ async def about(bot, query):
             InlineKeyboardButton('ʜᴏᴡ ᴛᴏ ᴜsᴇ ᴍᴇ ❓', callback_data='help')
             ],[
             InlineKeyboardButton('↩ ʙᴀᴄᴋ', callback_data='start')
+            ],[
+            InlineKeyboardButton('🧑‍💻 ꜱᴏᴜʀᴄᴇ ᴄoᴅᴇ 🧑‍💻', callback_data='source_prime')
             ]]
         ),
         disable_web_page_preview=True 
 )
+
+
+@Client.on_callback_query()
+async def cb_handler(client, query):
+    user_id = query.from_user.id
+    if query.data == "closes":
+        try:
+            await query.message.delete()
+        except Exception:
+            await query.answer("⚠️ Cannot delete message.", show_alert=True)
+        return  # exit early
+
+    elif query.data == "source_prime":   # ← নতুন callback_data
+        try:
+            # প্রথমে আগের মেসেজ ডিলিট হবে
+            await query.message.delete()
+        except Exception:
+            pass
+
+        # এখন নতুন করে ছবি + ক্যাপশন পাঠানো হবে
+        await query.message.reply_photo(
+            photo="https://i.postimg.cc/hvFZ93Ct/file-000000004188623081269b2440872960.png",
+            caption=(
+                f"👋 Hello Dear 👋,\n\n"
+                "⚠️ ᴛʜɪꜱ ʙᴏᴛ ɪꜱ ᴀ ᴘʀɪᴠᴀᴛᴇ ꜱᴏᴜʀᴄᴇ ᴘʀᴏᴊᴇᴄᴛ\n\n"
+                "ᴛʜɪs ʙᴏᴛ ʜᴀs ʟᴀsᴛᴇsᴛ ᴀɴᴅ ᴀᴅᴠᴀɴᴄᴇᴅ ꜰᴇᴀᴛᴜʀᴇs⚡️\n"
+                "▸ ɪꜰ ʏᴏᴜ ᴡᴀɴᴛ ꜱᴏᴜʀᴄᴇ ᴄoᴅᴇ oʀ ʟɪᴋᴇ ᴛʜɪꜱ ʙᴏᴛ ᴄᴏɴᴛᴀᴄᴛ ᴍᴇ..!\n"
+                "▸ ɪ ᴡɪʟʟ ᴄʀᴇᴀᴛᴇ ᴀ ʙᴏᴛ ꜰᴏʀ ʏᴏᴜ oʀ ꜱᴏᴜʀᴄᴇ ᴄoᴅᴇ\n"
+                "⇒ ᴄᴏɴᴛᴀᴄᴛ ᴍᴇ - ♚ ᴀᴅᴍɪɴ ♚."
+            ),
+            reply_markup=InlineKeyboardMarkup(
+                [
+                    [InlineKeyboardButton("♚ ᴀᴅᴍɪɴ ♚", url="https://t.me/Prime_Admin_Support_ProBot")],
+                    [InlineKeyboardButton("• ᴄʟᴏsᴇ •", callback_data="closes")]
+                ]
+            )
+    )
+        
