@@ -99,29 +99,21 @@ async def delCap(_, msg):
         await chnl_ids.delete_one({"chnl_id": chnl_id})
         return await msg.reply("<b><i>✓ Sᴜᴄᴄᴇssғᴜʟʟʏ... Dᴇʟᴇᴛᴇᴅ Yᴏᴜʀ Cᴀᴘᴛɪᴏɴ Nᴏᴡ I ᴀᴍ Usɪɴɢ Mʏ Dᴇғᴀᴜʟᴛ Cᴀᴘᴛɪᴏɴ </i></b>")
     except Exception as e:
-        e_val = await msg.reply(f"ERR I GOT: {e}")  # <-- Fixed from .replay to .reply
+        e_val = await msg.replay(f"ERR I GOT: {e}")
         await asyncio.sleep(5)
         await e_val.delete()
         return
 
-# Updated: Extract more languages and set default to "Not Sure"
 def extract_language(default_caption):
-    language_pattern = r'\b(Hindi|English|Tamil|Telugu|Malayalam|Kannada|Bengali|Bangla|Punjabi|Marathi|Gujarati|Bhojpuri|Urdu|Korean|Japanese|Chinese|Spanish|French|German|Russian|Arabic|Turkish|Thai|Sinhala|Oriya|Assamese|Nepali|Filipino|Vietnamese|Portuguese|Italian|Dutch|Swedish|Norwegian|Polish|Czech|Romanian|Ukrainian|Hebrew|Farsi|Pashto|Serbian|Malay|Indonesian|Tagalog|Hin)\b'
+    language_pattern = r'\b(Hindi|English|Tamil|Telugu|Malayalam|Kannada|Hin)\b'#Contribute More Language If You Have
     languages = set(re.findall(language_pattern, default_caption, re.IGNORECASE))
-    return ", ".join(sorted(languages, key=str.lower)) if languages else "Not Sure"
+    if not languages:
+        return "Hindi-English"
+    return ", ".join(sorted(languages, key=str.lower))
 
 def extract_year(default_caption):
     match = re.search(r'\b(19\d{2}|20\d{2})\b', default_caption)
     return match.group(1) if match else None
-
-def get_size(size):
-    units = ["Bytes", "Kʙ", "Mʙ", "Gʙ", "Tʙ", "Pʙ", "Eʙ"]
-    size = float(size)
-    i = 0
-    while size >= 1024.0 and i < len(units) - 1:
-        i += 1
-        size /= 1024.0
-    return "%.2f %s" % (size, units[i])
 
 @Client.on_message(filters.channel)
 async def reCap(bot, message):
@@ -144,16 +136,26 @@ async def reCap(bot, message):
                 try:
                     if cap_dets:
                         cap = cap_dets["caption"]
-                        replaced_caption = cap.format(
-                            file_name=file_name,
-                            file_size=get_size(file_size),
-                            default_caption=default_caption,
-                            language=language,
-                            year=year
-                        )
+                        replaced_caption = cap.format(file_name=file_name, file_size=get_size(file_size), default_caption=default_caption, language=language, year=year)
+                        await message.edit(replaced_caption)
+                    else:
+                        replaced_caption = DEF_CAP.format(file_name=file_name, file_size=get_size(file_size), default_caption=default_caption, language=language, year=year)
                         await message.edit(replaced_caption)
                 except FloodWait as e:
-                    await asyncio.sleep(e.x)  # <-- ensures even rapid messages are processed
+                    await asyncio.sleep(e.x)
+                    continue
+    return
+
+# Size conversion function
+def get_size(size):
+    units = ["Bytes", "Kʙ", "Mʙ", "Gʙ", "Tʙ", "Pʙ", "Eʙ"]
+    size = float(size)
+    i = 0
+    while size >= 1024.0 and i < len(units) - 1:  # Changed the condition to stop at the last unit
+        i += 1
+        size /= 1024.0
+    return "%.2f %s" % (size, units[i])
+
 
 @Client.on_callback_query(filters.regex(r'^start'))
 async def start(bot, query):
