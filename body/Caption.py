@@ -11,6 +11,8 @@ from pyrogram.types import *
 @Client.on_message(filters.command("start") & filters.private)
 async def strtCap(bot, message):
     user_id = int(message.from_user.id)
+    if await is_user_banned(user_id):  # <-- এই লাইনটি যোগ করুন
+        return                         # <-- এই লাইনটি যোগ করুন
     await insert(user_id)
     keyboard = InlineKeyboardMarkup(
         [
@@ -74,6 +76,94 @@ async def restart_bot(b, m):
     await msg.edit("Bot restarted successfully.")
     os.execl(sys.executable, sys.executable, *sys.argv)
 
+#====================== BAN/UNBAN FUNCTIONALITY START ======================#
+
+# Ban a user
+@Client.on_message(filters.command("ban_user") & filters.user(ADMIN))
+async def ban_a_user(client, message):
+    if len(message.command) == 1 and not message.reply_to_message:
+        return await message.reply_text(
+            "ℹ️ **Usage:**\n- Reply to a user's message with `/ban_user`.\n- Use `/ban_user [user_id]`."
+        )
+
+    try:
+        user_id = int(message.command[1]) if len(message.command) > 1 else message.reply_to_message.from_user.id
+        if await is_user_banned(user_id):
+            return await message.reply_text("This user is already banned.")
+            
+        user = await client.get_users(user_id)
+        await add_user_ban(user.id)
+        await message.reply_text(f"✅ **Successfully Banned!**\n\n**User:** {user.mention}\n**ID:** `{user.id}`")
+
+    except ValueError:
+        await message.reply_text("⚠️ Please provide a valid User ID.")
+    except Exception as e:
+        await message.reply_text(f"❌ Could not find the user or another error occurred: `{e}`")
+
+# Unban a user
+@Client.on_message(filters.command("unban_user") & filters.user(ADMIN))
+async def unban_a_user(client, message):
+    if len(message.command) == 1 and not message.reply_to_message:
+        return await message.reply_text(
+            "ℹ️ **Usage:**\n- Reply to a user's message with `/unban_user`.\n- Use `/unban_user [user_id]`."
+        )
+
+    try:
+        user_id = int(message.command[1]) if len(message.command) > 1 else message.reply_to_message.from_user.id
+        if not await is_user_banned(user_id):
+            return await message.reply_text("This user is not banned.")
+
+        user = await client.get_users(user_id)
+        await rm_user_ban(user.id)
+        await message.reply_text(f"✅ **Successfully Unbanned!**\n\n**User:** {user.mention}\n**ID:** `{user.id}`")
+
+    except ValueError:
+        await message.reply_text("⚠️ Please provide a valid User ID.")
+    except Exception as e:
+        await message.reply_text(f"❌ Could not find the user or another error occurred: `{e}`")
+
+# Ban a channel
+@Client.on_message(filters.command("ban_channel") & filters.user(ADMIN))
+async def ban_a_channel(client, message):
+    if len(message.command) < 2:
+        return await message.reply_text("ℹ️ **Usage:** `/ban_channel [channel_id]`")
+    
+    try:
+        channel_id = int(message.command[1])
+        if await is_chnl_banned(channel_id):
+            return await message.reply_text("This channel is already banned.")
+
+        chat = await client.get_chat(channel_id)
+        await add_chnl_ban(chat.id)
+        await message.reply_text(f"✅ **Channel Successfully Banned!**\n\n**Channel:** {chat.title}\n**ID:** `{chat.id}`")
+
+    except ValueError:
+        await message.reply_text("⚠️ Please provide a valid Channel ID. It must start with `-100`.")
+    except Exception as e:
+        await message.reply_text(f"❌ Could not find the channel or another error occurred: `{e}`")
+
+# Unban a channel
+@Client.on_message(filters.command("unban_channel") & filters.user(ADMIN))
+async def unban_a_channel(client, message):
+    if len(message.command) < 2:
+        return await message.reply_text("ℹ️ **Usage:** `/unban_channel [channel_id]`")
+        
+    try:
+        channel_id = int(message.command[1])
+        if not await is_chnl_banned(channel_id):
+            return await message.reply_text("This channel is not banned.")
+
+        chat = await client.get_chat(channel_id)
+        await rm_chnl_ban(chat.id)
+        await message.reply_text(f"✅ **Channel Successfully Unbanned!**\n\n**Channel:** {chat.title}\n**ID:** `{chat.id}`")
+
+    except ValueError:
+        await message.reply_text("⚠️ Please provide a valid Channel ID. It must start with `-100`.")
+    except Exception as e:
+        await message.reply_text(f"❌ Could not find the channel or another error occurred: `{e}`")
+
+#====================== BAN/UNBAN FUNCTIONALITY END ======================#
+    
 @Client.on_message(filters.command("set_cap") & filters.channel)
 async def setCap(bot, message):
     if len(message.command) < 2:
@@ -183,6 +273,8 @@ RETRY_LIMIT = 5
 @Client.on_message(filters.channel)
 async def reCap(bot, message):
     chnl_id = message.chat.id
+    if await is_chnl_banned(chnl_id): # <-- এই লাইনটি যোগ করুন
+        return                        # <-- এই লাইনটি যোগ করুন
     default_caption = message.caption or ""     # None হলে খালি স্ট্রিং
     if message.media:
         for file_type in ("video", "audio", "document", "voice"):
